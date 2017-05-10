@@ -8,9 +8,24 @@
     <body>
         <!--Вывод списка страниц для редактирования-->
         <?php
-            foreach($arrPages as $page){
-            echo "<li><a href='adm.php?edit={$page[name]}'>{$page['name']} - {$page['title']}</a></li>";
+            foreach($arrPages as $el){
+            echo "<li><a href='adm.php?edit={$el[name]}'>{$el['name']} - {$el['title']}</a></li>";
         }?>
+        
+        <? if (empty($page)): ?>
+        <p>Выберите страницу для редактирования</p>
+        <? else: ?>
         <!--Вывод формы редактирования выбранной страницы-->
+        <p>Редактирование страницы <i><?= $editPage ?></i></p>
+            <form action="adm.php" method="post">
+                <input type="hidden" name="oldName" value="<?= $editPage ?>">
+                <p>Название: <input type="text" name="name" value="<?= $page['name'] ?>"></p>
+                <p>Заголовок:<input type="text" name="title" value="<?= $page['title'] ?>"></p>
+                <p>Содержание:<br />
+                <textarea name="content" cols="100" rows="20"><?= $page['content'] ?></textarea>
+                </p>
+                <p><input type="submit" value="Сохранить изменения"></p>
+            </form>
+        <? endif ?>
     </body>
 </html>

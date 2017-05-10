@@ -57,6 +57,18 @@ class DB {
     }
     function updatePage($oldName, $newName, $newTitle, $newContent) {
         //Обновляет страницу
-    }
+        try {
+            $STHupdate = $this->DBH->prepare("UPDATE PAGES SET name=:newName, title=:newTitle, content=:newContent WHERE name =:oldName");
+            $STHupdate->bindParam(':newName', $newName, PDO::PARAM_STR);
+            $STHupdate->bindParam(':newTitle', $newTitle, PDO::PARAM_STR);
+            $STHupdate->bindParam(':newContent', $newContent, PDO::PARAM_STR);
+            $STHupdate->bindParam(':oldName', $oldName, PDO::PARAM_STR);
+            $STHupdate->execute();
+        } catch (Exception $ex) {
+            echo 'Houston, we have a problems, check PDOErrors.log';
+            file_put_contents('logs/PDOErrors.log', $e->getMessage(), FILE_APPEND);
+        }
+
+    }   
 }
 ?>
