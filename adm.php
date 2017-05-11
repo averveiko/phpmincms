@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $oldName = filter_var($_POST['oldName'], FILTER_SANITIZE_STRING);
     $newName = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
     $newTitle = filter_var($_POST['title'], FILTER_SANITIZE_STRING);
-    $newContent = $_POST['content'];
+    $newContent = $_POST['content']; //TODO фильтр применить
     
     $db->updatePage($oldName, $newName, $newTitle, $newContent);
 }

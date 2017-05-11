@@ -5,70 +5,47 @@
  * @author averveyko
  */
 class DB {
-    public $database = "sqlite:base/base.db";
-    private $DBH;
-    private $STHloadPage;
+    public $dsn = "sqlite:base/base.db";
+    private $pdo;
     
     function __construct() {
         try {
-            //Открываем базу
-            $this->DBH = new PDO($this->database);
-            $this->DBH->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-            //Подготавливаем запрос для получения страницы
-            $this->STHloadPage = $this->DBH->prepare("SELECT name, title, content FROM pages WHERE name=:name;");
-            $this->STHloadPage->setFetchMode(PDO::FETCH_ASSOC);
+            $this->pdo = new PDO($this->dsn);
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);            
         } catch(PDOException $e) {
-            echo 'Houston, we have a problems, check PDOErrors.log';
             file_put_contents('logs/PDOErrors.log', $e->getMessage(), FILE_APPEND);
         }
     }
     function __destruct() {
-        $this->DBH = null;
+        $this->pdo = null;
     }
     function loadPage($name) {
-        //Загрузка страницы из базы
         try {
-            $this->STHloadPage->bindParam(':name', $name, PDO::PARAM_STR);
-            $this->STHloadPage->execute();
-            return $row = $this->STHloadPage->fetch();
-            
+            $stmt = $this->pdo->prepare("SELECT name, title, content FROM pages WHERE name=?");
+            $stmt->execute([$name]);
+            return $stmt->fetch();
         } catch (PDOException $e) {
-            echo 'Houston, we have a problems, check PDOErrors.log';
             file_put_contents('logs/PDOErrors.log', $e->getMessage(), FILE_APPEND);
         }
     }
     //Функции для админки
     function listOfPages(){
         try {
-            $STHlistOfPages = $this->DBH->query("SELECT name, title FROM pages;");
-            $STHlistOfPages->setFetchMode(PDO::FETCH_ASSOC);
-            $STHlistOfPages->execute();
-            $arrPages = [];
-
-            while($row = $STHlistOfPages->fetch()) {  
-                $arrPages[] = $row;
-            }
-            return $arrPages;
+            $stmt = $this->pdo->query("SELECT name, title FROM pages");
+            return $stmt->fetchAll();    
         } catch (PDOException $e) {
-            echo 'Houston, we have a problems, check PDOErrors.log';
             file_put_contents('logs/PDOErrors.log', $e->getMessage(), FILE_APPEND);
         }
     }
     function updatePage($oldName, $newName, $newTitle, $newContent) {
         //Обновляет страницу
         try {
-            $STHupdate = $this->DBH->prepare("UPDATE PAGES SET name=:newName, title=:newTitle, content=:newContent WHERE name =:oldName");
-            $STHupdate->bindParam(':newName', $newName, PDO::PARAM_STR);
-            $STHupdate->bindParam(':newTitle', $newTitle, PDO::PARAM_STR);
-            $STHupdate->bindParam(':newContent', $newContent, PDO::PARAM_STR);
-            $STHupdate->bindParam(':oldName', $oldName, PDO::PARAM_STR);
-            $STHupdate->execute();
-        } catch (Exception $ex) {
-            echo 'Houston, we have a problems, check PDOErrors.log';
+            $stmt = $this->pdo->prepare("UPDATE PAGES SET name=?, title=?, content=? WHERE name=?");
+            $stmt->execute(array($newName, $newTitle, $newContent, $oldName));
+        } catch (PDOException $e) {
             file_put_contents('logs/PDOErrors.log', $e->getMessage(), FILE_APPEND);
         }
-
     }   
 }
 ?>
